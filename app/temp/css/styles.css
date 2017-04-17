@@ -9,7 +9,7 @@ img {
   height: auto; }
 
 h1 {
-  font-size: 2rem; }
+  font-size: 5rem; }
 
 @define-mixin media-small {
   @media (min-width: 530px) {

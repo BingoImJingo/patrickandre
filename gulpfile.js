@@ -1,45 +1,35 @@
 var gulp = require('gulp');
 	
-/*------------- Styles ----------------*/
-var postcss = require('gulp-postcss'),	
-autoprefixer = require('autoprefixer'),
-cssvars = require('postcss-simple-vars'),
-nested = require('postcss-nested'),
-cssImport = require('postcss-import');
+var autoprefixer = require('autoprefixer');
+var sass = require('gulp-sass');
+var browserSync = require('browser-sync').create();
 
-gulp.task('styles', function() {
-  return gulp.src('./app/assets/styles/styles.css')
-    .pipe(postcss([cssImport, cssvars, nested, autoprefixer]))
-    .pipe(gulp.dest('./app/temp/styles'));
+/*--------------- SASS ---------------*/
+gulp.task('sass', function () {  
+    gulp.src('./app/assets/styles/styles.scss')
+		.pipe(sass().on('error', sass.logError)) /*sass error handler*/
+        .pipe(sass({includePaths: ['scss']}))
+        .pipe(gulp.dest('./app/temp/css'));
 });
 
-/*------------- Watch ----------------*/
-var browserSync = require('browser-sync').create(),
-watch = require('gulp-watch');
+/*--------------- Browser Sync ---------------*/
+gulp.task('browser-sync', function() {  
+    browserSync.init(["app/temp/css/*.css"], {
+		notify:false, /*remove notification popup*/
+        server: {
+            baseDir: "app" /*index.html location*/
+        }
+    });
+});
 
-gulp.task('watch', function() {
-	
-  browserSync.init({
-	  notify:false,
-	  server: {
-		  baseDir: "app"
-	  }
-  });	
+gulp.task('default', ['sass', 'browser-sync'], function () {  
+    gulp.watch("./app/assets/styles/**/*.scss", ['sass']);
+});
 
-  watch('./app/*.html', function() {
+ gulp.watch('./app/*.html', function() {
     browserSync.reload();
   });
 
-  watch('./app/assets/styles/**/*.css', function() {
-    gulp.start('cssInject');
-  });
-
-});
-
-gulp.task('cssInject', ['styles'], function() {
-	return gulp.src('./app/temp/styles/styles.css')
-	.pipe(browserSync.stream());
-});
 
 
 
